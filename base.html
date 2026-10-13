@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CampusMart{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="site-header">
+    <div class="container nav">
+        <a class="brand" href="{{ url_for('index') }}">🎓 CampusMart</a>
+        <nav>
+            <a href="{{ url_for('index') }}">Browse</a>
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('sell') }}">Sell an item</a>
+                <span class="welcome">Hi, {{ session.get('user_name') }}</span>
+                <a class="nav-button" href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                <a class="nav-button" href="{{ url_for('register') }}">Join now</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+<main class="container main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-area">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+    <div class="container">CampusMart · A student marketplace mini-project</div>
+</footer>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
