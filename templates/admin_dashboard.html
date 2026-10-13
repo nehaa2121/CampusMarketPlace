@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard | CampusMart{% endblock %}
+
+{% block content %}
+
+<section class="admin-page">
+
+    <header class="admin-header">
+        <div>
+            <p class="eyebrow">CAMPUSMART CONTROL PANEL</p>
+            <h1>Admin Dashboard</h1>
+            <p>Manage listings and monitor your marketplace.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('admin_logout') }}">
+            <button type="submit" class="button button-outline">
+                Logout
+            </button>
+        </form>
+    </header>
+
+
+    <!-- Statistics -->
+    <div class="admin-stats">
+
+        <div class="admin-stat-card">
+            <div class="stat-icon">👥</div>
+            <p>Total users</p>
+            <h2>{{ total_users }}</h2>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="stat-icon">📦</div>
+            <p>Total listings</p>
+            <h2>{{ total_products }}</h2>
+        </div>
+
+        <div class="admin-stat-card">
+            <div class="stat-icon">💬</div>
+            <p>Contact requests</p>
+            <h2>{{ total_contacts }}</h2>
+        </div>
+
+    </div>
+
+
+    <!-- Product management -->
+    <section class="admin-section">
+
+        <div class="admin-section-heading">
+            <div>
+                <p class="eyebrow">MARKETPLACE MANAGEMENT</p>
+                <h2>All listings</h2>
+            </div>
+
+            <span class="admin-count">
+                {{ products|length }} listing(s)
+            </span>
+        </div>
+
+        {% if products %}
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Item</th>
+                        <th>Seller</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+
+                        <td>
+                            {% if product.image_url %}
+                            <img
+                                class="admin-product-image"
+                                src="{{ url_for('static',
+                                    filename=product.image_url) }}"
+                                alt="{{ product.name }}"
+                                loading="lazy"
+                            >
+                            {% else %}
+                            <div class="admin-no-image">📦</div>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a
+                                class="admin-item-link"
+                                href="{{ url_for('product_detail',
+                                    product_id=product.id) }}"
+                            >
+                                {{ product.name }}
+                            </a>
+                            <small>ID: {{ product.id }}</small>
+                        </td>
+
+                        <td>{{ product.seller_name }}</td>
+
+                        <td>{{ product.category }}</td>
+
+                        <td class="admin-price">
+                            ₹{{ "%.2f"|format(product.price)|replace(".00", "") }}
+                        </td>
+
+                        <td>
+                            <form
+                                method="POST"
+                                action="{{ url_for('admin_delete_product',
+                                    product_id=product.id) }}"
+                                onsubmit="return confirm(
+                                    'Are you sure you want to delete this listing?'
+                                );"
+                            >
+                                <button
+                                    type="submit"
+                                    class="delete-button"
+                                >
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        {% else %}
+        <div class="admin-empty">
+            <span>📦</span>
+            <h3>No listings yet</h3>
+            <p>Products added by students will appear here.</p>
+        </div>
+        {% endif %}
+
+    </section>
+
+
+    <!-- User management / registered users -->
+    <section class="admin-section">
+
+        <div class="admin-section-heading">
+            <div>
+                <p class="eyebrow">COMMUNITY</p>
+                <h2>Registered users</h2>
+            </div>
+
+            <span class="admin-count">
+                {{ users|length }} user(s)
+            </span>
+        </div>
+
+        {% if users %}
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Student name</th>
+                        <th>Email</th>
+                        <th>Registered on</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.created_at or "—" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        {% else %}
+        <div class="admin-empty">
+            <span>👥</span>
+            <h3>No registered users</h3>
+        </div>
+        {% endif %}
+
+    </section>
+
+
+    <footer class="admin-footer">
+        CampusMart Admin Panel · Student Marketplace Project
+    </footer>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} | CampusMart{% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb">
+    <a href="{{ url_for('index') }}">Home</a>
+    <span> / </span>
+    <span>{{ product.name }}</span>
+</div>
+
+
+<section class="product-detail-page">
+
+    <!-- Product photo -->
+    <div class="detail-image-column">
+        <div class="detail-image-wrap">
+
+            {% if product.image_url %}
+                <img
+                    class="detail-image"
+                    src="{{ url_for('static',
+                                    filename=product.image_url) }}"
+                    alt="{{ product.name }}"
+                >
+            {% else %}
+                <div class="detail-placeholder">
+                    {% if product.category == 'Books' %}
+                        📚
+                    {% elif product.category == 'Calculators' %}
+                        🧮
+                    {% elif product.category == 'Notes' %}
+                        📝
+                    {% elif product.category == 'Stationery' %}
+                        ✏️
+                    {% elif product.category == 'Electronics' %}
+                        💻
+                    {% else %}
+                        🎒
+                    {% endif %}
+
+                    <p>No photo uploaded</p>
+                </div>
+            {% endif %}
+
+        </div>
+
+        <p class="image-caption">
+            Item photo provided by the seller.
+        </p>
+    </div>
+
+
+    <!-- Product information -->
+    <div class="detail-content">
+
+        <div class="product-card-top">
+            <span class="category-tag">
+                {{ product.category }}
+            </span>
+
+            <span class="condition-tag">
+                {{ product.condition }}
+            </span>
+        </div>
+
+        <h1 class="detail-title">{{ product.name }}</h1>
+
+        <p class="detail-price">
+            ₹{{ "%.2f"|format(product.price)|replace(".00", "") }}
+        </p>
+
+        <div class="detail-divider"></div>
+
+        <h3>About this item</h3>
+
+        <p class="detail-description">
+            {{ product.description }}
+        </p>
+
+        <div class="seller-card">
+            <div class="seller-avatar seller-avatar-large">👤</div>
+
+            <div>
+                <p class="seller-label">SELLER</p>
+                <h3>{{ product.seller_name }}</h3>
+                <p class="seller-caption">Campus marketplace member</p>
+            </div>
+        </div>
+
+
+        <!-- Contact seller -->
+        {% if session.get('user_id') == product.seller_id %}
+
+            <div class="owner-notice">
+                <strong>This is your listing.</strong>
+                <p>You cannot contact yourself about your own item.</p>
+            </div>
+
+            <a href="{{ url_for('sell') }}" class="button full-width">
+                List another item
+            </a>
+
+        {% elif session.get('user_id') %}
+
+            <div class="contact-seller">
+                <h3>Interested in this item?</h3>
+                <p>Write a message to the seller.</p>
+
+                <form method="POST" class="contact-form">
+                    <label for="message">Your message</label>
+
+                    <textarea
+                        id="message"
+                        name="message"
+                        rows="4"
+                        maxlength="1000"
+                        required
+                        placeholder="Hi! Is this item still available?"
+                    ></textarea>
+
+                    <button type="submit" class="button full-width">
+                        Send message
+                    </button>
+                </form>
+
+                <p class="help-text">
+                    This demo saves your message in the database.
+                    It does not automatically send an email.
+                </p>
+            </div>
+
+        {% else %}
+
+            <div class="contact-seller">
+                <h3>Want to buy this item?</h3>
+                <p>Log in to contact the seller.</p>
+
+                <a href="{{ url_for('login') }}" class="button full-width">
+                    Login to contact seller
+                </a>
+
+                <p class="help-text">
+                    New to CampusMart?
+                    <a href="{{ url_for('register') }}">Create an account</a>.
+                </p>
+            </div>
+
+        {% endif %}
+
+        <a href="{{ url_for('index') }}" class="back-link">
+            ← Back to marketplace
+        </a>
+
+    </div>
+</section>
+
+{% endblock %}

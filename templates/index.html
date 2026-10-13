@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}CampusMart | Buy & Sell{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+    <div class="hero-content">
+        <p class="eyebrow">YOUR CAMPUS MARKETPLACE</p>
+        <h1>Buy smart.<br>Sell what you don't need.</h1>
+        <p class="hero-description">
+            Find affordable books, calculators, notes and other useful
+            items from fellow college students.
+        </p>
+
+        <div class="hero-actions">
+            <a href="#marketplace" class="button">Explore items</a>
+
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('sell') }}" class="button button-outline">
+                    + Sell an item
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="button button-outline">
+                    Login to sell
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="hero-decoration">
+        <div class="hero-card">
+            <span class="hero-emoji">📚</span>
+            <div>
+                <strong>Student to student</strong>
+                <p>Give useful things a second life.</p>
+            </div>
+        </div>
+        <div class="hero-circle">₹</div>
+    </div>
+</section>
+
+
+<section class="marketplace-section" id="marketplace">
+
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">EXPLORE THE COLLECTION</p>
+            <h2>Find your next useful thing</h2>
+            <p>Affordable items listed by students like you.</p>
+        </div>
+
+        {% if session.get('user_id') %}
+            <a href="{{ url_for('sell') }}" class="button">
+                + Add listing
+            </a>
+        {% endif %}
+    </div>
+
+
+    <!-- Search and filter form -->
+    <form method="GET" action="{{ url_for('index') }}"
+          class="search-form" id="search-form">
+
+        <div class="search-input-wrap">
+            <label for="search-q">Search items</label>
+            <input
+                type="search"
+                id="search-q"
+                name="q"
+                value="{{ search }}"
+                placeholder="Search books, notes, calculators..."
+            >
+        </div>
+
+        <div class="filter-input-wrap">
+            <label for="category-filter">Category</label>
+            <select id="category-filter" name="category">
+                <option value="">All categories</option>
+                {% for category in categories %}
+                    <option value="{{ category }}"
+                        {% if selected_category == category %}selected{% endif %}>
+                        {{ category }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-input-wrap">
+            <label for="min-price">Min price (₹)</label>
+            <input
+                type="number"
+                id="min-price"
+                name="min_price"
+                min="0"
+                step="0.01"
+                value="{{ min_price }}"
+                placeholder="0"
+            >
+        </div>
+
+        <div class="filter-input-wrap">
+            <label for="max-price">Max price (₹)</label>
+            <input
+                type="number"
+                id="max-price"
+                name="max_price"
+                min="0"
+                step="0.01"
+                value="{{ max_price }}"
+                placeholder="1000"
+            >
+        </div>
+
+        <button type="submit" class="button search-button">
+            Search
+        </button>
+
+        <a href="{{ url_for('index') }}" class="clear-filters">
+            Clear
+        </a>
+    </form>
+
+
+    <!-- Listing results -->
+    <div class="results-heading">
+        <h3>Available items</h3>
+        <span>{{ products|length }} item(s)</span>
+    </div>
+
+
+    {% if products %}
+        <div class="product-grid">
+
+            {% for product in products %}
+                <article class="product-card">
+
+                    <a class="product-image-link"
+                       href="{{ url_for('product_detail',
+                                        product_id=product.id) }}">
+
+                        {% if product.image_url %}
+                            <img
+                                class="product-image"
+                                src="{{ url_for('static',
+                                    filename=product.image_url) }}"
+                                alt="{{ product.name }}"
+                                loading="lazy"
+                            >
+                        {% else %}
+                            <div class="product-placeholder">
+                                <span>
+                                    {% if product.category == 'Books' %}
+                                        📚
+                                    {% elif product.category == 'Calculators' %}
+                                        🧮
+                                    {% elif product.category == 'Notes' %}
+                                        📝
+                                    {% elif product.category == 'Stationery' %}
+                                        ✏️
+                                    {% elif product.category == 'Electronics' %}
+                                        💻
+                                    {% else %}
+                                        🎒
+                                    {% endif %}
+                                </span>
+                                <small>No photo available</small>
+                            </div>
+                        {% endif %}
+
+                    </a>
+
+                    <div class="product-card-content">
+
+                        <div class="product-card-top">
+                            <span class="category-tag">
+                                {{ product.category }}
+                            </span>
+
+                            <span class="condition-tag">
+                                {{ product.condition }}
+                            </span>
+                        </div>
+
+                        <h3 class="product-title">
+                            <a href="{{ url_for('product_detail',
+                                                product_id=product.id) }}">
+                                {{ product.name }}
+                            </a>
+                        </h3>
+
+                        <p class="product-description">
+                            {{ product.description|truncate(95) }}
+                        </p>
+
+                        <div class="product-card-bottom">
+                            <div class="product-price">
+                                ₹{{ "%.2f"|format(product.price)|replace(".00", "") }}
+                            </div>
+
+                            <a class="view-product-link"
+                               href="{{ url_for('product_detail',
+                                                product_id=product.id) }}">
+                                View item →
+                            </a>
+                        </div>
+
+                        <div class="seller-info">
+                            <span class="seller-avatar">👤</span>
+                            <span>Listed by {{ product.seller_name }}</span>
+                        </div>
+
+                    </div>
+                </article>
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🔎</div>
+            <h3>No items found</h3>
+            <p>
+                Try another search term or remove some filters.
+                You can also be the first to list an item.
+            </p>
+
+            <a href="{{ url_for('index') }}" class="button button-outline">
+                Show all items
+            </a>
+
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('sell') }}" class="button">
+                    Sell an item
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+</section>
+
+
+<section class="bottom-cta">
+    <div>
+        <p class="eyebrow">HAVE SOMETHING TO SELL?</p>
+        <h2>Someone on campus might need it.</h2>
+        <p>List your unused books, notes or other useful items.</p>
+    </div>
+
+    {% if session.get('user_id') %}
+        <a href="{{ url_for('sell') }}" class="button">
+            Create a listing
+        </a>
+    {% else %}
+        <a href="{{ url_for('register') }}" class="button">
+            Join CampusMart
+        </a>
+    {% endif %}
+</section>
+
+{% endblock %}
